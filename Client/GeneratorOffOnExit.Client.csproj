@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>GeneratorOffOnExit.Client</AssemblyName>
+    <RootNamespace>GeneratorOffOnExit.Client</RootNamespace>
+    <ModAuthor>Dmnv</ModAuthor>
+    <ModName>GeneratorOffOnExit</ModName>
+    <Version>1.0.0</Version>
+    <Nullable>disable</Nullable>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" HintPath="$(HollowedPath)" Private="False" />
+    <Reference Include="Comfort" HintPath="$(ManagedPath)\Comfort.dll" Private="False" />
+    <Reference Include="Comfort.Unity" HintPath="$(ManagedPath)\Comfort.Unity.dll" Private="False" />
+    <Reference Include="UnityEngine" HintPath="$(ManagedPath)\UnityEngine.dll" Private="False" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedPath)\UnityEngine.CoreModule.dll" Private="False" />
+    <Reference Include="UnityEngine.InputLegacyModule" HintPath="$(ManagedPath)\UnityEngine.InputLegacyModule.dll" Private="False" />
+    <Reference Include="UnityEngine.UI" HintPath="$(ManagedPath)\UnityEngine.UI.dll" Private="False" />
+    <Reference Include="Unity.TextMeshPro" HintPath="$(ManagedPath)\Unity.TextMeshPro.dll" Private="False" />
+    <Reference Include="Sirenix.Serialization" HintPath="$(ManagedPath)\Sirenix.Serialization.dll" Private="False" />
+    <Reference Include="Newtonsoft.Json" HintPath="$(ManagedPath)\Newtonsoft.Json.dll" Private="False" />
+    <Reference Include="BepInEx" HintPath="$(BepInExPath)\core\BepInEx.dll" Private="False" />
+    <Reference Include="0Harmony" HintPath="$(BepInExPath)\core\0Harmony.dll" Private="False" />
+    <Reference Include="spt-common" HintPath="$(SptPluginsPath)\spt-common.dll" Private="False" />
+    <Reference Include="spt-reflection" HintPath="$(SptPluginsPath)\spt-reflection.dll" Private="False" />
+  </ItemGroup>
+
+  <Target Name="DeployClient" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true'">
+    <PropertyGroup>
+      <ClientDeployDir>$(BepInExPath)\plugins\$(ModAuthor)-$(ModName)</ClientDeployDir>
+    </PropertyGroup>
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ClientDeployDir)" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ClientDeployDir)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <Message Importance="High" Text="Client deployed: $(ClientDeployDir)" />
+  </Target>
+
+  <Target Name="PackageRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <DistDir>$(MSBuildProjectDirectory)\..\dist</DistDir>
+      <Staging>$(DistDir)\staging</Staging>
+      <PluginStaging>$(Staging)\BepInEx\plugins\$(ModAuthor)-$(ModName)</PluginStaging>
+    </PropertyGroup>
+    <RemoveDir Directories="$(Staging)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginStaging)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\LICENSE.txt" DestinationFolder="$(PluginStaging)" />
+    <ZipDirectory SourceDirectory="$(Staging)" DestinationFile="$(DistDir)\$(ModAuthor)-$(ModName)-$(Version).zip" Overwrite="true" />
+    <Message Importance="High" Text="Release zip: $(DistDir)\$(ModAuthor)-$(ModName)-$(Version).zip" />
+  </Target>
+</Project>
